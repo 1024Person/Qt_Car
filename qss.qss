@@ -1,0 +1,31 @@
+QPushButton#okBtn:pressed{
+    background-color: darkcyan
+}
+QPushButton#okBtn:hover{
+    background-color: rgba(100, 255, 200, 0.7);
+}
+QPushButton#okBtn:checked{
+    background-color: deepskyblue;
+}
+QPushButton#okBtn{
+    background-color: rgba(100, 100, 200, 0.5);
+    border-radius:5px;
+    width:60px;
+    height:30px;
+}
+QLabel#titleLabel{
+    font-size: 20pt;
+    border-style:solid;
+    border-color: red blue green yellow
+}
+
+QLineEdit:focus{
+    background-color: rgb(195,195,195);
+}
+QLineEdit{
+    color:rbg(200,255,200);
+    border-radius: 5px;
+    background-color: rgba(195,195,195,0.6);
+    selection-color:yellow;
+    selection-background-color:blue;
+}

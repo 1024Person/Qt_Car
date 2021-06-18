@@ -1,0 +1,177 @@
+//void DocXML::addChildNode(QString filePath, QString currentName, int index,QString childName, QStringList attrName, QStringList attrValue, QString content)
+//{
+//    QFile file(filePath);
+//    if(file.open(QIODevice::ReadOnly)){
+//        // file和xml文档对象关联
+//        QDomDocument doc;
+//        bool isOK = doc.setContent(&file);
+//        // 如果关联成功
+//        if(isOK)
+//        {
+//            // 关闭文件
+//            file.close();
+
+
+//            // 查找指定的节点,返回节点的列表
+//            QDomNodeList nodeList = doc.elementsByTagName(currentName);
+//            if(index>=nodeList.length()){
+//                cout<<"range out of list";
+//                return;
+//            }
+//            else{
+//                QDomNode temp = nodeList.at(index);
+//                QDomElement node = temp.toElement();    // 再转换成QDomElement对象
+//                QDomElement child;
+//                child.setTagName(childName);
+//                for(int i=0;i<attrName.length();i++){
+//                    child.setAttribute(attrName.at(i),attrValue.at(i));   // 设置属性
+//                }
+//                node.appendChild(child);
+
+
+//            }
+
+
+//        }
+
+//        else{
+//            cout<<"文件关联失败";
+//            file.close();
+//            return;
+//        }
+//    }
+//    else{
+//        cout<<"打开文件失败"<<filePath;
+//        return;
+//    }
+//}
+
+
+
+
+
+
+// 这个好像就是添加多个节点和添加单个节点的区别，还是没有实现在指定的节点下面再次添加节点
+void DocXML::appendNodesXml(QString filePath,QStringList nodeNames, map<QStringList, QStringList> attrs)
+{
+    QFile file(filePath);
+    if(file.open(QIODevice::ReadOnly)){
+        // file和xml文档对象关联
+        QDomDocument doc;
+        bool isOK = doc.setContent(&file);
+        // 如果关联成功
+        if(isOK)
+        {
+            // 关闭文件
+            file.close();
+            // 获取根节点元素
+            QDomElement root = doc.documentElement();   // 默认获取根节点，头部不会进行获取
+            // 下面开始从root节点创建子节点
+            map<QStringList,QStringList>::iterator it = attrs.begin();
+            for (int i = 0;i<nodeNames.length();i++){
+                QDomElement child = doc.createElement(nodeNames.at(i));
+                for(int j = 0;j<it->first.length();j++){
+                    child.setAttribute(it->first.at(j),it->second.at(j));   // 设置属性
+                }
+                // 将这个设置好的子节点添加到根节点中去
+                root.appendChild(child);
+                if(file.open(QIODevice::WriteOnly)){
+                    QTextStream stream(&file);
+                    doc.save(stream,4);
+                    file.close();
+                }
+            }
+        }
+
+        else{
+            cout<<"文件关联失败";
+            file.close();
+            return;
+        }
+    }
+    else{
+        cout<<"打开文件失败"<<filePath;
+        return;
+    }
+    
+    }
+
+////////////////////////// ============================
+
+
+// 获取当前日期
+QDateTime datetime = QDateTime::currentDateTime();
+QString dateStr = datetime.toString("yyyy-MM-dd");
+
+
+
+    // 如果有子节点的话
+//    if(root.hasChildNodes()){
+//        QDomElement lastEmt = root.lastChildElement();   // 获取最后一个子节点
+//        if(lastEmt.attribute("date") == dateStr){
+//            // 最后一个子节点就是当前日期的
+//            writeXml(doc,lastEmt,replace_var[1],textName_Values);
+//        }
+//        else{
+//            // 创建一级节点
+//           QDomElement child = createElement(replace_var[0][0][0],replace_var[0][1],replace_var[0][1]);
+//           root.appendChild(child);
+//        }
+//    }
+//    // 没有子节点的话
+//    else{
+
+//    }
+    // 保存文件
+    
+    
+//////======================
+    
+void DocXML::appendNodeXml(QString filePath, QString name, QStringList attrName, QStringList attrValue)
+{
+    QFile file(filePath);
+    if(file.open(QIODevice::ReadOnly)){
+        // file和xml文档对象关联
+        QDomDocument doc;
+        bool isOK = doc.setContent(&file);
+        // 如果关联成功
+        if(isOK)
+        {
+            // 关闭文件
+            file.close();
+            // 获取根节点元素
+            QDomElement root = doc.documentElement();   // 默认获取根节点，头部不会进行获取
+            // 创建子结点
+            QDomElement childEelement = doc.createElement(name);
+            // 创建属性
+            for(int i = 0;i<attrName.length();i++){
+                QDomAttr attr = doc.createAttribute(attrName.at(i));   // 设置属性的名称
+                attr.setValue(attrValue.at(i));
+                // 子节点和属性进行关联
+                childEelement.setAttributeNode(attr);
+
+            }
+
+            root.appendChild(childEelement);
+
+            // 保存文件
+            if(file.open(QIODevice::WriteOnly)){
+                QTextStream stream(&file);
+                doc.save(stream,4);
+                file.close();
+            }
+
+        }
+
+        else{
+            cout<<"文件关联失败";
+            file.close();
+            return;
+        }
+    }
+    else{
+        cout<<"打开文件失败"<<filePath;
+        return;
+    }
+}
+    
