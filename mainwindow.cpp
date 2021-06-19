@@ -97,15 +97,6 @@ void MainWindow::cleaningData(vector<vector<QStringList> > &data)
         if(fieldName.contains(data[i][0][0])){
             data[i][1].clear();
         }
-
-    }
-
-
-    for(size_t i = 0;i<data.size();i++){
-        for(size_t j = 0;j<data[i].size();j++){
-            qDebug()<<"["<<data[i][j]<<"]";
-        }
-        qDebug()<<"\n";
     }
 }
 
