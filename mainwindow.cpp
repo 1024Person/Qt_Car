@@ -6,10 +6,14 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    //DocXML::createXml(filePath,"日销售清单");
-    //generateElement();
+
+    fieldName<<"日销售清单"<<"日期"<<"时间";
 
     this->setQssSheet(":/qssFile/qss.qss");
+
+    getXMLInfo();
+
+
 
 }
 
@@ -20,6 +24,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::generateElement()
 {
+    QString rootName = "日销售清单";
+    DocXML::createXml(filePath,rootName);
     QDateTime dateTime = QDateTime::currentDateTime();
     QString dateStr = dateTime.toString("yyyy-MM-dd");
     QString timeStr = dateTime.toString("hh-mm-ss");
@@ -69,7 +75,41 @@ void MainWindow::generateElement()
 
 }
 
-void MainWindow::setQssSheet(QString filePath)
+
+void MainWindow::getXMLInfo()
+{
+    vector<vector<QStringList>> emtInformation;
+    DocXML::readDataXml(filePath,emtInformation,true);
+
+    cleaningData(emtInformation);
+
+
+
+
+}
+
+void MainWindow::cleaningData(vector<vector<QStringList> > &data)
+{
+    // 这里就要根据自己的具体需求进行清洗数据了
+    vector<vector<vector<QStringList>>::iterator> iter;
+    for (size_t i=0;i<data.size() ;i++) {
+        // 如果不是文本节点，
+        if(fieldName.contains(data[i][0][0])){
+            data[i][1].clear();
+        }
+
+    }
+
+
+    for(size_t i = 0;i<data.size();i++){
+        for(size_t j = 0;j<data[i].size();j++){
+            qDebug()<<"["<<data[i][j]<<"]";
+        }
+        qDebug()<<"\n";
+    }
+}
+
+void MainWindow::setQssSheet(const QString& filePath)
 {
     QFile qssFile(filePath);
     if(qssFile.open(QIODevice::ReadOnly)){

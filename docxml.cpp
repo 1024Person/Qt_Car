@@ -1,6 +1,7 @@
 #include "docxml.h"
 
-
+// 先初始化一下
+int DocXML::ID = 0;
 
 DocXML::DocXML(QString filePath)
 {
@@ -8,7 +9,7 @@ DocXML::DocXML(QString filePath)
 }
 
 
-void DocXML::createXml(QString filePath,QString rootName)
+void DocXML::createXml(QString& filePath,QString& rootName)
 {
     QFile file(filePath);
     if(file.exists() == true){
@@ -51,7 +52,7 @@ void DocXML::createXml(QString filePath,QString rootName)
 
 
 // 下面的几个方法都是搞好的非常  泛式 的接口，调用者自己向其中传进去参数
-void DocXML::appendNodeXml(const QString filePath,const vector<vector<QStringList>>&emtName_attrName_attrValue,const vector<QStringList>& textName_Values)
+void DocXML::appendNodeXml(const QString& filePath,const vector<vector<QStringList>>&emtName_attrName_attrValue,const vector<QStringList>& textName_Values)
 {
     /*
  * emtName_attrName_attrValue,是一个二维数组，每一行代表着name，attrNames，attrValues，
@@ -87,7 +88,7 @@ void DocXML::appendNodeXml(const QString filePath,const vector<vector<QStringLis
         // 当前节点没有文本子节点
         if(i-1<textName_Values.size())
             writeXml(doc,child,replace_var[i],textName_Values[i-1]);
-        // 当前节点有自己的文本子节点
+    // 当前节点有自己的文本子节点
         else{
             writeXml(doc,child,replace_var[i]);
         }
@@ -100,7 +101,7 @@ void DocXML::appendNodeXml(const QString filePath,const vector<vector<QStringLis
     file.close();   // 关闭文件
 }
 
-void DocXML::appendNodeXml(const QString filePath, const vector<vector<QStringList> > &emtName_attrName_attrValue_s, bool isMerger, const vector<QStringList> &textName_Values)
+void DocXML::appendNodeXml(const QString& filePath, const vector<vector<QStringList> > &emtName_attrName_attrValue_s, bool isMerger, const vector<QStringList> &textName_Values)
 {
     if(!isMerger){  // 如果不兼并的话，就直接在根节点下面创建节点
         return appendNodeXml(filePath,emtName_attrName_attrValue_s,textName_Values);
@@ -125,7 +126,7 @@ void DocXML::appendNodeXml(const QString filePath, const vector<vector<QStringLi
     file.close();
     QDomElement root = doc.documentElement();
     if(!root.hasChildNodes()){// 如果根节点下面没有子节点，
-/*
+        /*
 * 也就是说如果这个xml文档是刚刚创建传来的新文档的话，
 * 就直接在root节点下面创建子节点
 */
@@ -178,6 +179,113 @@ void DocXML::appendNodeXml(const QString filePath, const vector<vector<QStringLi
 
 
 }
+// 根节点的数据，然后就是
+bool DocXML::readDataXml(const QString &filePath, vector<vector<QStringList>> &emtName_attrName_attrValue_text_parentID_curID, bool isRoot,int parentId ,const QDomElement parentEmt)
+{
+    /*
+  * 整个递归用到的都是这一个ID，每次进入新的函数递归的时候这个ID都会自动加1，这样保证了每一个节点的id不至于重复
+  *如果发生重复的话，会非常的麻烦，因为这样的话，两个节点可能会具有相同的id
+  *这里有点线程之间的通信那个味了
+*/
+
+    ID++;// 这里不知道会不会通信紊乱
+    // 如果是从根节点开始读取的话
+    if(isRoot){
+        return readDataXml(filePath,emtName_attrName_attrValue_text_parentID_curID);
+    }
+
+    auto childNodes = parentEmt.childNodes();
+    // 循环遍历
+    for(int i=0;i<childNodes.length();i++){
+        auto child = childNodes.at(i).toElement();
+        // 如果这个子节点下面还有子节点的话，再接着递归调用
+        // 存在子节点的时候，才会再次将数据都存起来，如果没有子节点的话，说明这个节点的父亲节点就是叶子节点
+        if(child.hasChildNodes()){
+
+            vector<QStringList> curEmtInfo;     // 当前子节点的信息
+            QStringList childName(child.tagName());    // 子节点的名字
+            QStringList attrNameValue;          // 所有属性信息
+            QStringList text(child.text());     // 文本信息
+
+            getAllAttr(child,attrNameValue);
+
+            attrNameValue<<"parentID"<<QString::number(parentId)<<"curID"<<QString::number(ID);
+
+            // 存到当前节点的信息列表中
+            curEmtInfo.push_back(childName);
+            curEmtInfo.push_back(text);
+            curEmtInfo.push_back(attrNameValue);
+            // 将当前列表的信息放到总信息列表中
+            emtName_attrName_attrValue_text_parentID_curID.push_back(curEmtInfo);
+            // 将后面节点的内容保存下来
+            readDataXml(filePath,emtName_attrName_attrValue_text_parentID_curID,false,ID,child);
+
+        }
+    }
+    return true;
+}
+
+// 这里要注意根节点下面的子节点的父节点的ID，都是1，而且根节点的父节点ID是0这里是硬编码
+// 同时还要判断这个当前节点是否有孩子节点，如果没有孩子节点的话，就将这个孩子节点设置为空；
+bool DocXML::readDataXml(const QString &filePath, vector<vector<QStringList> > &emtName_attrName_attrValue_text_parentID_curID)
+{
+    QFile file(filePath);
+    if(!file.open(QIODevice::ReadOnly)){
+        cout<<"文件打开失败"<<filePath;
+        return false;
+    }
+    QDomDocument doc;
+    if(!doc.setContent(&file)){
+        cout<<"文件关联失败"<<filePath;
+        file.close();
+        return false;
+    }
+    file.close();
+    QDomElement root = doc.documentElement();
+    vector<QStringList> curEmt;     // 当前节点的所有信息
+
+    QStringList attrNameValue;  // 属性
+    QStringList rootName(root.tagName());   // 节点名称
+    QStringList text(root.text());       // 文本内容
+    getAllAttr(root,attrNameValue);
+    // 将父元素的ID和自己的ID存进去
+    attrNameValue<<"parentID"<<"0"<<"curID"<<"1";
+    curEmt.push_back(rootName);
+    curEmt.push_back(text);
+    if(!root.hasChildNodes()){// 如果根节点下面没有子节点，
+        attrNameValue<<"hasChildNode"<<"";
+        curEmt.push_back(attrNameValue);
+        // 将当前节点的数据存到提供的树中
+        emtName_attrName_attrValue_text_parentID_curID.push_back(curEmt);
+        return false;
+    }
+    else{
+        attrNameValue<<"hasChildNode"<<"true";
+        curEmt.push_back(attrNameValue);
+        // 将当前节点的数据存到提供的树中
+        emtName_attrName_attrValue_text_parentID_curID.push_back(curEmt);
+        // 开始读取根节点下面的每一个子节点
+        readDataXml(filePath,emtName_attrName_attrValue_text_parentID_curID,false,ID,root);
+        return true;    // 有子节点
+    }
+
+}
+
+bool DocXML::getAllAttr(const QDomElement &emt, QStringList &attrNameValue)
+{
+
+    auto attrMap = emt.attributes();
+    // 这个节点没有属性，返回false
+    if(attrMap.length()<=0){
+        return false;
+    }
+    // 这个节点有属性返回true
+    for(int i=0;i<attrMap.length();i++){
+        QDomAttr temp = attrMap.item(i).toAttr();
+        attrNameValue<<temp.name()<<temp.value();
+    }
+    return true;
+}
 
 void DocXML::writeXml(QDomDocument &doc, QDomElement &parentEmt,const vector<QStringList>&emtName_attrName_attrValue,const QStringList& textName_Values)
 {
@@ -198,6 +306,9 @@ void DocXML::writeXml(QDomDocument &doc, QDomElement &parentEmt,const vector<QSt
     }
     for(int i = 0;i<textName_Values.length();i++){
         auto childNode = doc.createElement(textName_Values.at(i));
+
+
+
         QDomText childText = doc.createTextNode(textName_Values.at(++i));  // 创建文本节点
         childNode.appendChild(childText);   // 将这个文本节点添加到子元素中？
         curEmt.appendChild(childNode);     // 将子节点添加到time元素中去
