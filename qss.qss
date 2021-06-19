@@ -1,31 +1,103 @@
-QPushButton#okBtn:pressed{
-    background-color: darkcyan
-}
-QPushButton#okBtn:hover{
-    background-color: rgba(100, 255, 200, 0.7);
-}
-QPushButton#okBtn:checked{
-    background-color: deepskyblue;
-}
-QPushButton#okBtn{
-    background-color: rgba(100, 100, 200, 0.5);
-    border-radius:5px;
-    width:60px;
-    height:30px;
+#centralwidget  {
+        border-image:url(:/img/bg.jpeg);
 }
 QLabel#titleLabel{
     font-size: 20pt;
     border-style:solid;
-    border-color: red blue green yellow
+    color:rgb(220,0,110);
+}
+QWidget{
+         background: transparent;
+         color:#FF6600;
+         font-weight:bold;
+         font-size:18px;
+
+}
+QMenu{
+background:transparent;
+}
+/*设置菜单栏*/
+QMenu:selected{
+    background-color:rgba(0,190,255,0.5);
+    min-width:5px;
+}
+QListWidget::item{
+    background-color:rgba(0,0,0,0.3);
+    font-size:10px;
+    font-style:italic;
+    text-algin:center;
+
+}
+QPushButton#okBtn:pressed{
+    background-color: rgba(0,0,255,0.5);
 }
 
+
+QPushButton{
+        color:rgb(255,255,255);
+    border-radius:4px;
+    width:80px;
+    height:40px;
+}
+QPushButton#okBtn{
+            background-color: rgba(0,0,255,0.6);
+}
+#cancleBtn{
+        background-color:rgba(200,20,0,0.6);
+}
+QPushButton#cancleBtn:pressed{
+        background-color:rgba(200,20,0,0.5);
+}
+QLabel{
+font-size:20px;
+color:rgba(255,0,51,0.8);
+
+}
 QLineEdit:focus{
     background-color: rgb(195,195,195);
 }
 QLineEdit{
-    color:rbg(200,255,200);
+    color:rgba(200,100,0,1);
+        font-size:21px;
     border-radius: 5px;
     background-color: rgba(195,195,195,0.6);
     selection-color:yellow;
     selection-background-color:blue;
+        margin-top:2px;
+        margin-right:2px;
+        margin-bottom:2px;
+        min-height:9px;
 }
+
+QSpinBox{
+        background-color:rgba(195,195,190,0.5);
+        border-style:solid   ;
+        border-width:2px;
+        border-color:rgba(195,195,100,0.8);
+        border-radius:8px;
+        height:24 px;
+        font-size:20px;
+        font-style:italic;
+        font-weight:400;
+}
+QComboBox{
+color:rgba(100,100,0,0.8);
+background-color:#CCCCCC;
+border-color : rgba(200,150,160,0.4);
+padding-top:6px;
+padding-right:3px;
+min-width:10px;
+border-style:solid;
+border-width:2px;
+}
+
+#existsShowLabel,#priceShowLabel {
+border-radius:5px;
+min-height:24px;
+font-style:italic;
+font-size:20px;
+font-weight:bold;
+background-color:rgba(195,195,195,0.8);
+text-align:center;
+}
+
