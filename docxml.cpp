@@ -2,13 +2,6 @@
 
 // 先初始化一下
 int DocXML::ID = 0;
-
-DocXML::DocXML(QString filePath)
-{
-
-}
-
-
 void DocXML::createXml(QString& filePath,QString& rootName)
 {
     QFile file(filePath);
@@ -52,7 +45,7 @@ void DocXML::createXml(QString& filePath,QString& rootName)
 
 
 // 下面的几个方法都是搞好的非常  泛式 的接口，调用者自己向其中传进去参数
-void DocXML::appendNodeXml(const QString& filePath,const vector<vector<QStringList>>&emtName_attrName_attrValue,const vector<QStringList>& textName_Values)
+void DocXML::appendNodeXml(const QString& filePath,const QVector<QVector<QStringList>>&emtName_attrName_attrValue,const QVector<QStringList>& textName_Values)
 {
     /*
  * emtName_attrName_attrValue,是一个二维数组，每一行代表着name，attrNames，attrValues，
@@ -83,7 +76,7 @@ void DocXML::appendNodeXml(const QString& filePath,const vector<vector<QStringLi
 
     root.appendChild(child);
     // 不断的在当前节点下面写入新的节点，注意是在当前节点下面！！！
-    for(size_t i = 1;i<replace_var.size();i++)
+    for(int i = 1;i<replace_var.size();i++)
         // 这里需要判断一下，当前节点下面是否要建立文本子节点
         // 当前节点没有文本子节点
         if(i-1<textName_Values.size())
@@ -101,7 +94,7 @@ void DocXML::appendNodeXml(const QString& filePath,const vector<vector<QStringLi
     file.close();   // 关闭文件
 }
 
-void DocXML::appendNodeXml(const QString& filePath, const vector<vector<QStringList> > &emtName_attrName_attrValue_s, bool isMerger, const vector<QStringList> &textName_Values)
+void DocXML::appendNodeXml(const QString& filePath, const QVector<QVector<QStringList> > &emtName_attrName_attrValue_s, bool isMerger, const QVector<QStringList> &textName_Values)
 {
     if(!isMerger){  // 如果不兼并的话，就直接在根节点下面创建节点
         return appendNodeXml(filePath,emtName_attrName_attrValue_s,textName_Values);
@@ -160,7 +153,7 @@ void DocXML::appendNodeXml(const QString& filePath, const vector<vector<QStringL
         */
 
     if(flag){   // 应该在这个节点上添加新的节点
-        for(size_t k = 1;k<emtName_attrName_attrValue_s.size();k++){
+        for(int k = 1;k<emtName_attrName_attrValue_s.size();k++){
             writeXml(doc,lastEmt,emtName_attrName_attrValue_s[k],textName_Values[k-1]);
         }
     }
@@ -180,7 +173,7 @@ void DocXML::appendNodeXml(const QString& filePath, const vector<vector<QStringL
 
 }
 // 根节点的数据，然后就是
-bool DocXML::readDataXml(const QString &filePath, vector<vector<QStringList>> &emtName_attrName_attrValue_text_parentID_curID, bool isRoot,int parentId ,const QDomElement parentEmt)
+bool DocXML::readDataXml(const QString &filePath, QVector<QVector<QStringList>> &emtName_attrName_attrValue_text_parentID_curID, bool isRoot,int parentId ,const QDomElement parentEmt)
 {
     /*
   * 整个递归用到的都是这一个ID，每次进入新的函数递归的时候这个ID都会自动加1，这样保证了每一个节点的id不至于重复
@@ -202,7 +195,7 @@ bool DocXML::readDataXml(const QString &filePath, vector<vector<QStringList>> &e
         // 存在子节点的时候，才会再次将数据都存起来，如果没有子节点的话，说明这个节点的父亲节点就是叶子节点
         if(child.hasChildNodes()){
 
-            vector<QStringList> curEmtInfo;     // 当前子节点的信息
+            QVector<QStringList> curEmtInfo;     // 当前子节点的信息
             QStringList childName(child.tagName());    // 子节点的名字
             QStringList attrNameValue;          // 所有属性信息
             QStringList text(child.text());     // 文本信息
@@ -227,7 +220,7 @@ bool DocXML::readDataXml(const QString &filePath, vector<vector<QStringList>> &e
 
 // 这里要注意根节点下面的子节点的父节点的ID，都是1，而且根节点的父节点ID是0这里是硬编码
 // 同时还要判断这个当前节点是否有孩子节点，如果没有孩子节点的话，就将这个孩子节点设置为空；
-bool DocXML::readDataXml(const QString &filePath, vector<vector<QStringList> > &emtName_attrName_attrValue_text_parentID_curID)
+bool DocXML::readDataXml(const QString &filePath, QVector<QVector<QStringList> > &emtName_attrName_attrValue_text_parentID_curID)
 {
     QFile file(filePath);
     if(!file.open(QIODevice::ReadOnly)){
@@ -242,7 +235,7 @@ bool DocXML::readDataXml(const QString &filePath, vector<vector<QStringList> > &
     }
     file.close();
     QDomElement root = doc.documentElement();
-    vector<QStringList> curEmt;     // 当前节点的所有信息
+    QVector<QStringList> curEmt;     // 当前节点的所有信息
 
     QStringList attrNameValue;  // 属性
     QStringList rootName(root.tagName());   // 节点名称
@@ -253,7 +246,6 @@ bool DocXML::readDataXml(const QString &filePath, vector<vector<QStringList> > &
     curEmt.push_back(rootName);
     curEmt.push_back(text);
     if(!root.hasChildNodes()){// 如果根节点下面没有子节点，
-        attrNameValue<<"hasChildNode"<<"";
         curEmt.push_back(attrNameValue);
         // 将当前节点的数据存到提供的树中
         emtName_attrName_attrValue_text_parentID_curID.push_back(curEmt);
@@ -287,7 +279,7 @@ bool DocXML::getAllAttr(const QDomElement &emt, QStringList &attrNameValue)
     return true;
 }
 
-void DocXML::writeXml(QDomDocument &doc, QDomElement &parentEmt,const vector<QStringList>&emtName_attrName_attrValue,const QStringList& textName_Values)
+void DocXML::writeXml(QDomDocument &doc, QDomElement &parentEmt,const QVector<QStringList>&emtName_attrName_attrValue,const QStringList& textName_Values)
 {
     auto repalce_emt = emtName_attrName_attrValue;
     QDomElement curEmt;
@@ -325,4 +317,39 @@ QDomElement DocXML::createElement(const QString &name,const QStringList& attrNam
         childEelement.setAttribute(attrName.at(i),attrValue.at(i));
     }
     return childEelement;
+}
+
+// 感觉这样构建的不是很好阿，因为对STL容器的使用不熟练导致了这里使用parentIndex应该使用一个map<map<QString,QString>>容器的
+// 但是就算是使用一个map<map<QString,QString>>容器也不是很好，最好是使用模板容器
+QVector<QVector<QStringList> > DocXML::connectTreeNode(QVector<QVector<QStringList>>& emtName_attrName_attrValue_text)
+{
+    QVector<QVector<QStringList>> tree;
+    QStringList idParent;
+    for(int i = 0;i<emtName_attrName_attrValue_text.size();i++){
+        int parentIndex = emtName_attrName_attrValue_text[i][2].indexOf("parentID");
+        // 父节点是根节点的节点
+        if(emtName_attrName_attrValue_text[i][2].at(parentIndex+1) == "1"){
+            int curIndex = emtName_attrName_attrValue_text[i][2].indexOf("curID");
+            tree.push_back(emtName_attrName_attrValue_text[i]); // 将这个节点存其来
+            idParent.push_back(emtName_attrName_attrValue_text[i][2].at(curIndex+1));   // 将当前节点的ID存下来，查找它们的子节点的时候使用
+            // 同时将这些节点从emtName_attrName_attrValue_text中移除
+            emtName_attrName_attrValue_text.removeOne(emtName_attrName_attrValue_text[i]);
+        }
+    }
+    // 退出循环的条件，父节点的ID列表为空
+    while(!emtName_attrName_attrValue_text.empty()){
+        for(QStringList::iterator iterID = idParent.begin();iterID!=idParent.end();iterID++)
+        {for(QVector<QVector<QStringList>>::iterator iter = emtName_attrName_attrValue_text.begin();iter!=emtName_attrName_attrValue_text.end();iter++){
+            int parentIDIndex = (*iter)[2].indexOf("parentID");  // 查找parentID的位置
+            QString parentIDStr = (*iter)[2].at(parentIDIndex+1);   //得到parentID
+            if(parentIDStr == *iterID){
+
+            }
+
+
+            // 下一步就是找到每个节点的父亲节点
+        }}
+
+
+    }
 }

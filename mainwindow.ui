@@ -89,7 +89,13 @@
                 </widget>
                </item>
                <item>
-                <widget class="QComboBox" name="brandComboBox"/>
+                <widget class="QComboBox" name="brandComboBox">
+                 <item>
+                  <property name="text">
+                   <string>请选择</string>
+                  </property>
+                 </item>
+                </widget>
                </item>
                <item>
                 <spacer name="horizontalSpacer_4">
@@ -118,7 +124,18 @@
                 </widget>
                </item>
                <item>
-                <widget class="QComboBox" name="factoryComboBox"/>
+                <widget class="QComboBox" name="factoryComboBox">
+                 <item>
+                  <property name="text">
+                   <string>北京现代</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>特斯拉</string>
+                  </property>
+                 </item>
+                </widget>
                </item>
               </layout>
              </widget>

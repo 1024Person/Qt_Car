@@ -1,5 +1,5 @@
 #centralwidget  {
-        border-image:url(:/img/bg.jpeg);
+
 }
 QLabel#titleLabel{
     font-size: 20pt;
@@ -40,10 +40,10 @@ QPushButton{
     height:40px;
 }
 QPushButton#okBtn{
-            background-color: rgba(0,0,255,0.6);
+            background-color: rgba(0,0,255,0.8);
 }
 #cancleBtn{
-        background-color:rgba(200,20,0,0.6);
+        background-color:rgba(200,20,0,0.8);
 }
 QPushButton#cancleBtn:pressed{
         background-color:rgba(200,20,0,0.5);
@@ -82,7 +82,7 @@ QSpinBox{
 }
 QComboBox{
 color:rgba(100,100,0,0.8);
-background-color:#CCCCCC;
+background-color:#CCFF00;
 border-color : rgba(200,150,160,0.4);
 padding-top:6px;
 padding-right:3px;
